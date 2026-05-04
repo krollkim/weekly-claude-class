@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מפגש 1 — מהצ׳אט לסוכן</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --accent: #7c6aff;
+    --accent2: #ff6a9e;
+    --accent3: #6affd4;
+    --text: #e8e8f0;
+    --text-muted: #7070a0;
+    --border: #2a2a40;
+    --theory: #1e1635;
+    --theory-border: #7c6aff;
+    --demo: #0d2020;
+    --demo-border: #6affd4;
+    --practice: #200d1a;
+    --practice-border: #ff6a9e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Heebo', sans-serif;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .hero {
+    background: linear-gradient(135deg, #0a0a0f 0%, #1a0d2e 50%, #0a1a1a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 40px 50px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(124,106,255,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -80px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(106,255,212,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .session-badge {
+    display: inline-block;
+    background: rgba(124,106,255,0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 6px 16px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 60%, var(--accent3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle {
+    font-size: 18px;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin-bottom: 32px;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .meta-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .meta-chip .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  .dot-time { background: var(--accent3); }
+  .dot-level { background: var(--accent); }
+  .dot-goal { background: var(--accent2); }
+
+  /* TIMELINE NAV */
+  .timeline-nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+
+  .timeline-btn {
+    padding: 16px 24px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-muted);
+    font-family: 'Heebo', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .timeline-btn.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+
+  .timeline-btn:hover:not(.active) {
+    color: var(--text);
+    border-bottom-color: var(--border);
+  }
+
+  .time-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* MAIN CONTENT */
+  .content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px;
+  }
+
+  .section {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .section.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* BLOCKS */
+  .block {
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    position: relative;
+  }
+
+  .block-theory {
+    background: var(--theory);
+    border-color: var(--theory-border);
+  }
+
+  .block-demo {
+    background: var(--demo);
+    border-color: var(--demo-border);
+  }
+
+  .block-practice {
+    background: var(--practice);
+    border-color: var(--practice-border);
+  }
+
+  .block-neutral {
+    background: var(--surface);
+    border-color: var(--border);
+  }
+
+  .block-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tag-theory { color: var(--accent); }
+  .tag-demo { color: var(--accent3); }
+  .tag-practice { color: var(--accent2); }
+  .tag-tip { color: #ffb86a; }
+
+  .block-tag::before {
+    content: '';
+    width: 20px;
+    height: 1px;
+  }
+
+  .tag-theory::before { background: var(--accent); }
+  .tag-demo::before { background: var(--accent3); }
+  .tag-practice::before { background: var(--accent2); }
+  .tag-tip::before { background: #ffb86a; }
+
+  .block h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .block h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .block p {
+    color: var(--text-muted);
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+
+  .block p:last-child { margin-bottom: 0; }
+
+  /* STEPS */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .step-num-theory { background: rgba(124,106,255,0.2); color: var(--accent); border: 1px solid var(--accent); }
+  .step-num-demo { background: rgba(106,255,212,0.1); color: var(--accent3); border: 1px solid var(--accent3); }
+  .step-num-practice { background: rgba(255,106,158,0.1); color: var(--accent2); border: 1px solid var(--accent2); }
+
+  .step-content h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .step-content p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: #0d0d14;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #a0a0c0;
+    overflow-x: auto;
+    position: relative;
+  }
+
+  .code-block .comment { color: #4a4a70; }
+  .code-block .highlight { color: var(--accent3); }
+  .code-block .label { color: var(--accent); }
+
+  .copy-btn {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .copy-btn:hover {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  /* PROMPT BOX */
+  .prompt-box {
+    background: #0d0d14;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    position: relative;
+  }
+
+  .prompt-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .prompt-text {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.8;
+  }
+
+  /* TABLE */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 14px;
+  }
+
+  .compare-table th {
+    background: var(--surface2);
+    padding: 12px 16px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--text);
+    border-bottom: 2px solid var(--border);
+  }
+
+  .compare-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    vertical-align: top;
+  }
+
+  .compare-table tr:hover td {
+    background: var(--surface2);
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .badge-old { background: rgba(255,106,158,0.15); color: var(--accent2); border: 1px solid var(--accent2); }
+  .badge-new { background: rgba(124,106,255,0.15); color: var(--accent); border: 1px solid var(--accent); }
+
+  /* CHECKLIST */
+  .checklist {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .checklist li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .check-box {
+    width: 20px; height: 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .check-box:hover {
+    border-color: var(--accent);
+  }
+
+  .check-box.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .check-box.checked::after {
+    content: '✓';
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* TIMER */
+  .timer-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .timer-label {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .timer-display {
+    font-family: 'Space Mono', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent3);
+  }
+
+  .timer-controls {
+    display: flex;
+    gap: 8px;
+  }
+
+  .timer-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Heebo', sans-serif;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+
+  .timer-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .timer-btn.running {
+    background: rgba(255,106,158,0.2);
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  /* CALLOUT */
+  .callout {
+    background: rgba(255,184,106,0.08);
+    border: 1px solid rgba(255,184,106,0.3);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+  .callout-text { font-size: 14px; color: var(--text-muted); }
+  .callout-text strong { color: var(--text); }
+
+  /* PROGRESS */
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 24px 0;
+    position: relative;
+    overflow: visible;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent3) 100%);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* NAV BUTTONS */
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .nav-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Heebo', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .nav-btn:disabled:hover {
+    background: var(--surface);
+    border-color: var(--border);
+  }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .section-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .icon-theory { background: rgba(124,106,255,0.15); border: 1px solid var(--accent); }
+  .icon-demo { background: rgba(106,255,212,0.1); border: 1px solid var(--accent3); }
+  .icon-practice { background: rgba(255,106,158,0.1); border: 1px solid var(--accent2); }
+  .icon-summary { background: rgba(255,255,255,0.05); border: 1px solid var(--border); }
+
+  .section-header-text h2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .section-header-text p {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  /* TWO COL */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  @media (max-width: 600px) {
+    .two-col { grid-template-columns: 1fr; }
+    .content { padding: 24px 20px; }
+    .hero { padding: 40px 20px; }
+    .timeline-nav { padding: 0 20px; }
+    .meta-row { gap: 12px; }
+  }
+
+  /* HIGHLIGHT TEXT */
+  .hl { color: var(--accent3); font-weight: 600; }
+  .hl-purple { color: var(--accent); font-weight: 600; }
+  .hl-pink { color: var(--accent2); font-weight: 600; }
+
+  /* QUOTE */
+  .quote {
+    border-right: 3px solid var(--accent);
+    padding: 12px 20px;
+    margin: 16px 0;
+    background: rgba(124,106,255,0.05);
+    border-radius: 0 8px 8px 0;
+  }
+
+  .quote p {
+    font-size: 16px;
+    color: var(--text);
+    font-style: italic;
+    margin: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="session-badge">Session 01 / 08</div>
+  <h1>מהצ׳אט לסוכן</h1>
+  <p class="hero-subtitle">הפרדיגמה החדשה של AI — מ-Input/Output לפעולה אמיתית בעולם</p>
+  <div class="meta-row">
+    <div class="meta-chip"><span class="dot dot-time"></span>60 דקות</div>
+    <div class="meta-chip"><span class="dot dot-level"></span>כל הרמות</div>
+    <div class="meta-chip"><span class="dot dot-goal"></span>Claude.ai — ממשק רגיל</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="timeline-nav">
+  <button class="timeline-btn active" onclick="showSection('overview')">📋 סקירה</button>
+  <button class="timeline-btn" onclick="showSection('theory')"><span class="time-tag">0-15'</span>תיאוריה</button>
+  <button class="timeline-btn" onclick="showSection('demo')"><span class="time-tag">15-40'</span>דמו חי</button>
+  <button class="timeline-btn" onclick="showSection('practice')"><span class="time-tag">40-60'</span>תרגול</button>
+  <button class="timeline-btn" onclick="showSection('summary')">✅ סיכום</button>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- OVERVIEW -->
+  <div class="section active" id="section-overview">
+    <div class="section-header">
+      <div class="section-icon icon-summary">🗺️</div>
+      <div class="section-header-text">
+        <h2>מה קורה היום?</h2>
+        <p>סקירת המפגש — מה נלמד, איך ולמה זה חשוב</p>
+      </div>
+    </div>
+
+    <div class="block block-neutral">
+      <div class="block-tag tag-tip">⚡ מטרת המפגש</div>
+      <h2>לנפץ את המיתוס</h2>
+      <p>רוב האנשים חושבים ש-AI זה "גוגל חכם יותר". היום אנחנו מבינים למה זו הגדרה שגויה לחלוטין — ומה ההבדל האמיתי בין צ'אטבוט לסוכן.</p>
+      <div class="quote">
+        <p>"אני שואל, הוא עונה" → "אני נותן יעד, הוא משיג אותו"</p>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="block block-theory" style="margin-bottom:0">
+        <div class="block-tag tag-theory">תיאוריה / 15 דק׳</div>
+        <h3>הפרדיגמה החדשה</h3>
+        <p>מה ההבדל בין LLM לסוכן? מה זה Context? מה זה Tool Use?</p>
+      </div>
+      <div class="block block-demo" style="margin-bottom:0">
+        <div class="block-tag tag-demo">דמו חי / 25 דק׳</div>
+        <h3>קלוד בפעולה</h3>
+        <p>3 דמואים חיים שמראים את ההבדל בין "צ'אט" לבין "סוכן שחושב"</p>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <div class="block block-practice" style="margin-bottom:0">
+        <div class="block-tag tag-practice">תרגול ביחד / 20 דק׳</div>
+        <h3>כל אחד מנסה</h3>
+        <p>כל אחד כותב prompt מורכב לבעיה אמיתית מהחיים שלו ומשווה גישות</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="block block-neutral">
+      <div class="block-tag tag-tip">🏁 מה מביאים לפגישה</div>
+      <ul class="checklist">
+        <li><span class="check-box" onclick="toggleCheck(this)"></span>חשבון Claude.ai פעיל (Pro מומלץ)</li>
+        <li><span class="check-box" onclick="toggleCheck(this)"></span>מחשב פתוח</li>
+        <li><span class="check-box" onclick="toggleCheck(this)"></span>בעיה אחת מהחיים / העסק שאתם רוצים לפתור</li>
+        <li><span class="check-box" onclick="toggleCheck(this)"></span>סקרנות 🙂</li>
+      </ul>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" disabled>→ קודם</button>
+      <button class="nav-btn" onclick="showSection('theory')">תיאוריה ←</button>
+    </div>
+  </div>
+
+  <!-- THEORY -->
+  <div class="section" id="section-theory">
+    <div class="section-header">
+      <div class="section-icon icon-theory">🧠</div>
+      <div class="section-header-text">
+        <h2>תיאוריה</h2>
+        <p>15 דקות — הקונספטים הבסיסיים</p>
+      </div>
+    </div>
+
+    <div class="timer-block">
+      <span class="timer-label">טיימר — תיאוריה</span>
+      <span class="timer-display" id="timer">15:00</span>
+      <div class="timer-controls">
+        <button class="timer-btn" id="timerBtn" onclick="toggleTimer('timer', 15)">▶ התחל</button>
+        <button class="timer-btn" onclick="resetTimer('timer', 15)">↺</button>
+      </div>
+    </div>
+
+    <div class="block block-theory">
+      <div class="block-tag tag-theory">קונספט 1 / 5 דקות</div>
+      <h2>LLM vs. Agent — מה ההבדל?</h2>
+      <p>כולנו הכרנו את ChatGPT/Claude בתור "מכונה שעונה על שאלות". זה נכון — אבל זה רק חצי מהסיפור.</p>
+
+      <table class="compare-table">
+        <tr>
+          <th>מימד</th>
+          <th><span class="badge badge-old">LLM רגיל</span></th>
+          <th><span class="badge badge-new">Agent</span></th>
+        </tr>
+        <tr>
+          <td>מה הוא עושה?</td>
+          <td>עונה על שאלה</td>
+          <td>מבצע משימה</td>
+        </tr>
+        <tr>
+          <td>כמה שלבים?</td>
+          <td>אחד (Prompt → Response)</td>
+          <td>מרובים (מחשב, בודק, מתקן)</td>
+        </tr>
+        <tr>
+          <td>יש לו כלים?</td>
+          <td>לא — רק טקסט</td>
+          <td>כן — אינטרנט, קבצים, API</td>
+        </tr>
+        <tr>
+          <td>מי מחליט?</td>
+          <td>אתה מחליט הכל</td>
+          <td>הוא מחליט תוך כדי</td>
+        </tr>
+        <tr>
+          <td>אנלוגיה</td>
+          <td>מחשבון</td>
+          <td>עובד שמקבל פרויקט</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="block block-theory">
+      <div class="block-tag tag-theory">קונספט 2 / 5 דקות</div>
+      <h2>מה זה Context Window?</h2>
+      <p>זה הדבר הכי חשוב להבין על קלוד. Context Window הוא <span class="hl-purple">הזיכרון הזמני</span> של קלוד לאורך השיחה.</p>
+      <p>דמיינו שיש לכם שולחן עבודה — כל מה שנמצא על השולחן הוא ה-Context. קלוד רואה ומשתמש בכל מה שעל השולחן.</p>
+      <div class="callout">
+        <span class="callout-icon">💡</span>
+        <span class="callout-text"><strong>לכן:</strong> ככל שתתנו לקלוד יותר הקשר (מי אתם, מה אתם עושים, מה המטרה), התוצאות יהיו טובות פי 10. זה לא AI גרוע — זה הקשר גרוע.</span>
+      </div>
+    </div>
+
+    <div class="block block-theory">
+      <div class="block-tag tag-theory">קונספט 3 / 5 דקות</div>
+      <h2>Tool Use — איך סוכן "נוגע" בעולם</h2>
+      <p>סוכן לא רק מדבר. הוא יכול להשתמש ב<span class="hl">כלים</span> כדי לבצע פעולות אמיתיות:</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num step-num-theory">🔍</div>
+          <div class="step-content">
+            <h4>Web Search</h4>
+            <p>מחפש מידע עדכני באינטרנט בזמן אמת</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num step-num-theory">📁</div>
+          <div class="step-content">
+            <h4>File System (MCP)</h4>
+            <p>קורא וכותב קבצים במחשב שלכם</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num step-num-theory">⚡</div>
+          <div class="step-content">
+            <h4>Code Execution</h4>
+            <p>כותב קוד ומריץ אותו בפועל — לא רק מציג</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num step-num-theory">🔗</div>
+          <div class="step-content">
+            <h4>API Calls</h4>
+            <p>מתחבר לשירותים חיצוניים (Monday, Gmail, Notion...)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="showSection('overview')">→ סקירה</button>
+      <button class="nav-btn" onclick="showSection('demo')">דמו חי ←</button>
+    </div>
+  </div>
+
+  <!-- DEMO -->
+  <div class="section" id="section-demo">
+    <div class="section-header">
+      <div class="section-icon icon-demo">🎬</div>
+      <div class="section-header-text">
+        <h2>דמו חי</h2>
+        <p>25 דקות — 3 דמואים שמראים את הכוח האמיתי</p>
+      </div>
+    </div>
+
+    <div class="timer-block">
+      <span class="timer-label">טיימר — דמו</span>
+      <span class="timer-display" id="timer2">25:00</span>
+      <div class="timer-controls">
+        <button class="timer-btn" id="timerBtn2" onclick="toggleTimer('timer2', 25)">▶ התחל</button>
+        <button class="timer-btn" onclick="resetTimer('timer2', 25)">↺</button>
+      </div>
+    </div>
+
+    <div class="callout">
+      <span class="callout-icon">🎯</span>
+      <span class="callout-text"><strong>הנחיית מנחה:</strong> תפתח את Claude.ai על המסך. כל דמו — הראה תחילה את ה"גרסה הרגילה" ואז את הגרסה ה"סוכנית". תן להם לראות את ההבדל בעצמם.</span>
+    </div>
+
+    <!-- DEMO 1 -->
+    <div class="block block-demo">
+      <div class="block-tag tag-demo">דמו 1 / ~8 דקות — "הוואו רגע"</div>
+      <h2>שאלה פשוטה vs. משימה מורכבת</h2>
+      <p>תראה את ההבדל בין prompt שטחי לבין prompt עם הקשר מלא.</p>
+
+      <h3 style="margin-top:16px; color: var(--accent2)">❌ גרסה שגויה — רוב האנשים כותבים כך:</h3>
+      <div class="prompt-box">
+        <div class="prompt-label">Prompt גרוע</div>
+        <div class="prompt-text">כתוב לי אסטרטגיה שיווקית</div>
+      </div>
+
+      <h3 style="color: var(--accent3)">✅ גרסה נכונה — Prompt עם הקשר:</h3>
+      <div class="prompt-box">
+        <div class="prompt-label">Prompt מלא עם הקשר</div>
+        <div class="prompt-text">
+          אתה יועץ אסטרטגי עם 15 שנות ניסיון בשיווק דיגיטלי לעסקים קטנים.<br><br>
+          הלקוח שלנו: [שם העסק של אוהד/אלי]<br>
+          קהל יעד: [פרטים שהם יספקו]<br>
+          תקציב חודשי: [X ₪]<br>
+          המטרה ב-90 ימים: [מה הם רוצים להשיג]<br><br>
+          בנה אסטרטגיה שיווקית מפורטת הכוללת: ערוצים מומלצים עם הנמקה, לוח זמנים, KPIs למדידה, ו-3 ניסויים ראשונים שאפשר להתחיל השבוע.
+        </div>
+      </div>
+      <p style="margin-top:8px">👉 <strong>הראה את שתי התוצאות בזמן אמת</strong> ותן להם לראות את ההבדל.</p>
+    </div>
+
+    <!-- DEMO 2 -->
+    <div class="block block-demo">
+      <div class="block-tag tag-demo">דמו 2 / ~8 דקות — "Chain of Thought"</div>
+      <h2>לגרום לקלוד לחשוב בקול רם</h2>
+      <p>כשאומרים לקלוד לחשוב בשלבים — התוצאות משתפרות דרמטית.</p>
+
+      <div class="prompt-box">
+        <div class="prompt-label">Prompt עם Chain of Thought</div>
+        <div class="prompt-text">
+          אני רוצה לפתוח עסק של [X]. לפני שאתה נותן המלצות, אני רוצה שתעשה את הדברים הבאים בסדר:<br><br>
+          שלב 1: נתח את הסיכונים העיקריים (לפחות 5)<br>
+          שלב 2: זהה את ההזדמנויות (לפחות 3)<br>
+          שלב 3: בדוק מה המתחרים עושים (תשאל אותי אם אתה צריך מידע)<br>
+          שלב 4: רק אחרי כל אלה — תן המלצה מנומקת<br><br>
+          התחל מהשלב הראשון ועצור לאחר כל שלב לאישור שלי.
+        </div>
+      </div>
+      <div class="callout">
+        <span class="callout-icon">💡</span>
+        <span class="callout-text"><strong>מה להראות:</strong> שקלוד "עוצר" ושואל, מחכה לאישור, ובונה את הניתוח בהדרגה. זה ה-Agentic behavior בצורתו הכי פשוטה.</span>
+      </div>
+    </div>
+
+    <!-- DEMO 3 -->
+    <div class="block block-demo">
+      <div class="block-tag tag-demo">דמו 3 / ~9 דקות — "הסוכן בפעולה"</div>
+      <h2>Web Search — קלוד מחפש בזמן אמת</h2>
+      <p>תראה את הכפתור של Web Search ב-Claude.ai ותפעיל אותו.</p>
+
+      <div class="prompt-box">
+        <div class="prompt-label">Prompt עם Web Search מופעל</div>
+        <div class="prompt-text">
+          חפש באינטרנט מה הטרנדים הכי חמים בתחום [תחום רלוונטי לאוהד/אלי] ב-2026.<br><br>
+          אחרי שמצאת מידע עדכני, בנה לי דוח קצר של 3 הזדמנויות שאני יכול לנצל עכשיו, עם לינקים למקורות.
+        </div>
+      </div>
+      <p>👉 תראה להם את ה"כלי שמחפש" — הם יראו קלוד "גולש" בזמן אמת.</p>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="showSection('theory')">→ תיאוריה</button>
+      <button class="nav-btn" onclick="showSection('practice')">תרגול ←</button>
+    </div>
+  </div>
+
+  <!-- PRACTICE -->
+  <div class="section" id="section-practice">
+    <div class="section-header">
+      <div class="section-icon icon-practice">⚡</div>
+      <div class="section-header-text">
+        <h2>תרגול ביחד</h2>
+        <p>20 דקות — כל אחד בונה prompt משלו</p>
+      </div>
+    </div>
+
+    <div class="timer-block">
+      <span class="timer-label">טיימר — תרגול</span>
+      <span class="timer-display" id="timer3">20:00</span>
+      <div class="timer-controls">
+        <button class="timer-btn" id="timerBtn3" onclick="toggleTimer('timer3', 20)">▶ התחל</button>
+        <button class="timer-btn" onclick="resetTimer('timer3', 20)">↺</button>
+      </div>
+    </div>
+
+    <div class="block block-practice">
+      <div class="block-tag tag-practice">משימה לאוהד / vibe coder</div>
+      <h2>אוהד — המשימה שלך</h2>
+      <p>בחר משהו שאתה עושה עכשיו ב-ChatGPT/Claude בצורה פשוטה. עכשיו בנה אותו מחדש בתור prompt עם הקשר מלא.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num step-num-practice">1</div>
+          <div class="step-content">
+            <h4>זהה בעיה אמיתית</h4>
+            <p>משהו שאתה עושה שבועי/יומי שAI יכול לעזור בו</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num step-num-practice">2</div>
+          <div class="step-content">
+            <h4>כתוב prompt "גרוע" קודם</h4>
+            <p>כמו שהיית כותב לפני השיעור הזה</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num step-num-practice">3</div>
+          <div class="step-content">
+            <h4>שפר עם הקונספטים שלמדנו</h4>
+            <p>הוסף: תפקיד, הקשר, שלבים, מטרה ברורה</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num step-num-practice">4</div>
+          <div class="step-content">
+            <h4>השווה תוצאות בקול רם</h4>
+            <p>שתף מה שקיבלת — ביחד נשפר</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block block-practice">
+      <div class="block-tag tag-practice">משימה לאלי / מתקדם</div>
+      <h2>אלי — המשימה שלך</h2>
+      <p>אלי כבר בנה CRM ועבד עם API. האתגר שלו הוא יותר טכני.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num step-num-practice">1</div>
+          <div class="step-content">
+            <h4>בחר workflow קיים</h4>
+            <p>תהליך שאתה עושה ידנית בעסק/פרויקט</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num step-num-practice">2</div>
+          <div class="step-content">
+            <h4>תאר אותו לקלוד כ"ארכיטקט"</h4>
+            <p>בקש ממנו לנתח איפה AI יכול להיכנס לתוך ה-workflow</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num step-num-practice">3</div>
+          <div class="step-content">
+            <h4>בקש תוכנית מימוש</h4>
+            <p>לא רק "מה" — גם "איך" ו"באיזה כלים"</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt-box" style="margin-top:16px">
+        <div class="prompt-label">Prompt מנחה לאלי</div>
+        <div class="prompt-text">
+          אתה ארכיטקט תוכנה מומחה ב-AI integrations.<br><br>
+          יש לי workflow קיים: [תאר את התהליך שלך]<br><br>
+          שלב 1: נתח את כל השלבים ודרג אותם לפי: (א) כמה זמן לוקחים, (ב) כמה חזרתיים הם, (ג) כמה שגיאות אנושיות יש בהם<br>
+          שלב 2: המלץ על 3 נקודות כניסה לאוטומציה עם Claude/AI<br>
+          שלב 3: לכל נקודת כניסה — ציין: הכלי המומלץ, רמת קושי (1-5), זמן מימוש משוער
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <span class="callout-icon">🔥</span>
+      <span class="callout-text"><strong>טיפ למנחה:</strong> תן 8 דקות לכתיבה עצמאית, ואז 12 דקות לשיתוף ודיון. תשאל: "מה הפתיע אתכם בתוצאה?" ו"מה הייתם עושים אחרת?"</span>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="showSection('demo')">→ דמו</button>
+      <button class="nav-btn" onclick="showSection('summary')">סיכום ←</button>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="section" id="section-summary">
+    <div class="section-header">
+      <div class="section-icon icon-summary">✅</div>
+      <div class="section-header-text">
+        <h2>סיכום המפגש</h2>
+        <p>מה לקחנו הביתה + מה השיעור הבא</p>
+      </div>
+    </div>
+
+    <div class="block block-neutral">
+      <div class="block-tag tag-tip">📌 3 דברים לזכור מהיום</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num step-num-theory">1</div>
+          <div class="step-content">
+            <h4>Context is everything</h4>
+            <p>ככל שתתנו יותר הקשר — התוצאה טובה יותר. "כתוב מייל" ≠ "אתה מנהל מכירות עם 10 שנות ניסיון, כתוב מייל follow-up ללקוח שראה הצעה לפני שבועיים..."</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num step-num-theory">2</div>
+          <div class="step-content">
+            <h4>קלוד לא קורא מחשבות</h4>
+            <p>הוא יעשה בדיוק מה שביקשתם. לא יותר, לא פחות. הדיוק ב-prompt = הדיוק בתוצאה.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num step-num-theory">3</div>
+          <div class="step-content">
+            <h4>Agent = מרובה שלבים</h4>
+            <p>ברגע שאתם שוברים משימה לשלבים — אתם כבר בונים סוכן. זה הבסיס לכל מה שנלמד בשאר הקורס.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block block-neutral">
+      <div class="block-tag tag-tip">🏠 שיעורי בית (אופציונלי)</div>
+      <p>לפני המפגש הבא — נסו לעשות <span class="hl">3 דברים שונים</span> עם קלוד שאתם רגילים לעשות בצורה ידנית. רשמו:</p>
+      <ul class="checklist" style="margin-top:12px">
+        <li><span class="check-box" onclick="toggleCheck(this)"></span>מה ניסיתם?</li>
+        <li><span class="check-box" onclick="toggleCheck(this)"></span>מה עבד טוב?</li>
+        <li><span class="check-box" onclick="toggleCheck(this)"></span>מה לא עבד ולמה לדעתכם?</li>
+      </ul>
+    </div>
+
+    <div class="block block-neutral">
+      <div class="block-tag tag-tip">🔜 מפגש 2 — Projects + System Prompts</div>
+      <h2>מה מחכה לנו בשבוע הבא?</h2>
+      <p>נלמד איך לבנות "גרסה אישית" של קלוד שמכירה את העסק שלכם — ותמיד תדבר בקול שלכם. נבנה <span class="hl-purple">Claude Project</span> לכל אחד מכם.</p>
+      <div class="callout">
+        <span class="callout-icon">📂</span>
+        <span class="callout-text"><strong>להביא לשיעור הבא:</strong> לוגו של העסק, 2-3 דוגמאות לתקשורת שאתם אוהבים (מייל, פוסט, הצעת מחיר) ו-3 משפטים שמתארים את סגנון הדיבור של המותג שלכם.</span>
+      </div>
+    </div>
+
+    <div class="progress-label">
+      <span>התקדמות הקורס</span>
+      <span>מפגש 1 / 8</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: 12.5%"></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="showSection('practice')">→ תרגול</button>
+      <button class="nav-btn" disabled>מפגש 2 — בקרוב ←</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// SECTION SWITCHING
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.timeline-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  const buttons = document.querySelectorAll('.timeline-btn');
+  const map = { overview: 0, theory: 1, demo: 2, practice: 3, summary: 4 };
+  buttons[map[id]].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// CHECKLIST
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+}
+
+// TIMERS
+const timers = {};
+
+function toggleTimer(id, minutes) {
+  if (timers[id] && timers[id].running) {
+    clearInterval(timers[id].interval);
+    timers[id].running = false;
+    document.getElementById('timerBtn' + (id === 'timer' ? '' : id.replace('timer', ''))).classList.remove('running');
+    document.getElementById('timerBtn' + (id === 'timer' ? '' : id.replace('timer', ''))).textContent = '▶ המשך';
+  } else {
+    if (!timers[id]) {
+      timers[id] = { seconds: minutes * 60, running: false };
+    }
+    timers[id].running = true;
+    const btnId = id === 'timer' ? 'timerBtn' : (id === 'timer2' ? 'timerBtn2' : 'timerBtn3');
+    document.getElementById(btnId).classList.add('running');
+    document.getElementById(btnId).textContent = '⏸ עצור';
+    timers[id].interval = setInterval(() => {
+      if (timers[id].seconds <= 0) {
+        clearInterval(timers[id].interval);
+        timers[id].running = false;
+        document.getElementById(id).textContent = '⏰ סיום!';
+        document.getElementById(id).style.color = 'var(--accent2)';
+        return;
+      }
+      timers[id].seconds--;
+      const m = Math.floor(timers[id].seconds / 60);
+      const s = timers[id].seconds % 60;
+      document.getElementById(id).textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }, 1000);
+  }
+}
+
+function resetTimer(id, minutes) {
+  if (timers[id]) {
+    clearInterval(timers[id].interval);
+    timers[id] = null;
+  }
+  const btnId = id === 'timer' ? 'timerBtn' : (id === 'timer2' ? 'timerBtn2' : 'timerBtn3');
+  document.getElementById(id).textContent = `${String(minutes).padStart(2,'0')}:00`;
+  document.getElementById(id).style.color = 'var(--accent3)';
+  document.getElementById(btnId).classList.remove('running');
+  document.getElementById(btnId).textContent = '▶ התחל';
+}
+</script>
+
+</body>
+</html>
