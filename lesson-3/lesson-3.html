@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מפגש 3 — Prompt Engineering מתקדם</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap');
+  :root {
+    --bg:#0f0a00;--surface:#1a1200;--surface2:#261a00;
+    --accent:#f97316;--accent2:#a78bfa;--accent3:#34d399;
+    --text:#f0ead8;--text-muted:#a08040;--border:#402a00;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Heebo',sans-serif;line-height:1.7;}
+  .hero{background:linear-gradient(135deg,#0f0a00 0%,#200d00 50%,#0f1500 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(249,115,22,0.12) 0%,transparent 70%);pointer-events:none;}
+  .session-badge{display:inline-block;background:rgba(249,115,22,0.1);border:1px solid var(--accent);color:var(--accent);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;padding:6px 16px;border-radius:2px;margin-bottom:20px;text-transform:uppercase;}
+  .hero h1{font-size:clamp(28px,4.5vw,50px);font-weight:900;line-height:1.1;margin-bottom:16px;background:linear-gradient(135deg,#fff 0%,var(--accent) 60%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .hero-subtitle{font-size:18px;color:var(--text-muted);max-width:600px;margin-bottom:32px;}
+  .meta-row{display:flex;gap:24px;flex-wrap:wrap;}
+  .meta-chip{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);padding:8px 16px;border-radius:6px;font-size:14px;color:var(--text-muted);}
+  .dot{width:8px;height:8px;border-radius:50%;}
+  .dot-a{background:var(--accent);}.dot-b{background:var(--accent2);}.dot-c{background:var(--accent3);}
+  .timeline-nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 40px;display:flex;overflow-x:auto;}
+  .timeline-btn{padding:16px 24px;background:none;border:none;border-bottom:3px solid transparent;color:var(--text-muted);font-family:'Heebo',sans-serif;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all 0.2s;}
+  .timeline-btn.active{color:var(--text);border-bottom-color:var(--accent);}
+  .timeline-btn:hover:not(.active){color:var(--text);}
+  .time-tag{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);margin-right:6px;}
+  .content{max-width:900px;margin:0 auto;padding:40px;}
+  .section{display:none;animation:fadeIn 0.3s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .block{border-radius:12px;padding:28px 32px;margin-bottom:24px;border:1px solid var(--border);}
+  .block-theory{background:#1f0e00;border-color:var(--accent);}
+  .block-demo{background:#100a20;border-color:var(--accent2);}
+  .block-practice{background:#001a10;border-color:var(--accent3);}
+  .block-neutral{background:var(--surface);border-color:var(--border);}
+  .block-tag{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .tag-theory{color:var(--accent);}.tag-demo{color:var(--accent2);}.tag-practice{color:var(--accent3);}.tag-tip{color:#60a5fa;}
+  .block-tag::before{content:'';width:20px;height:1px;}
+  .tag-theory::before{background:var(--accent);}.tag-demo::before{background:var(--accent2);}.tag-practice::before{background:var(--accent3);}.tag-tip::before{background:#60a5fa;}
+  .block h2{font-size:22px;font-weight:700;margin-bottom:12px;}
+  .block h3{font-size:16px;font-weight:600;margin-bottom:8px;}
+  .block p{color:var(--text-muted);font-size:15px;margin-bottom:12px;}
+  .block p:last-child{margin-bottom:0;}
+  .technique-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin:12px 0;}
+  .technique-name{font-family:'Space Mono',monospace;font-size:12px;color:var(--accent);letter-spacing:1px;margin-bottom:8px;}
+  .technique-desc{font-size:14px;color:var(--text-muted);margin-bottom:12px;}
+  .steps{display:flex;flex-direction:column;gap:16px;margin-top:16px;}
+  .step{display:flex;gap:16px;align-items:flex-start;}
+  .step-num{width:32px;height:32px;min-width:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px;}
+  .sn-t{background:rgba(249,115,22,0.15);color:var(--accent);border:1px solid var(--accent);}
+  .sn-d{background:rgba(167,139,250,0.1);color:var(--accent2);border:1px solid var(--accent2);}
+  .sn-p{background:rgba(52,211,153,0.1);color:var(--accent3);border:1px solid var(--accent3);}
+  .step-content h4{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
+  .step-content p{font-size:14px;color:var(--text-muted);margin:0;}
+  .prompt-box{background:#0a0800;border:1px solid var(--accent);border-radius:8px;padding:20px 24px;margin:12px 0;}
+  .prompt-label{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+  .prompt-text{font-size:14px;color:var(--text);line-height:1.8;}
+  .prompt-bad{border-color:var(--accent2);}
+  .prompt-bad .prompt-label{color:var(--accent2);}
+  .vs-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+  .callout{background:rgba(96,165,250,0.05);border:1px solid rgba(96,165,250,0.2);border-radius:8px;padding:16px 20px;margin:16px 0;display:flex;gap:12px;}
+  .callout-icon{font-size:18px;flex-shrink:0;}
+  .callout-text{font-size:14px;color:var(--text-muted);}
+  .callout-text strong{color:var(--text);}
+  .checklist{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:12px;}
+  .checklist li{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--text-muted);}
+  .check-box{width:20px;height:20px;border:1.5px solid var(--border);border-radius:4px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+  .check-box:hover{border-color:var(--accent);}
+  .check-box.checked{background:var(--accent);border-color:var(--accent);}
+  .check-box.checked::after{content:'✓';color:#000;font-size:12px;font-weight:700;}
+  .timer-block{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .timer-label{font-size:14px;color:var(--text-muted);}
+  .timer-display{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--accent);}
+  .timer-controls{display:flex;gap:8px;}
+  .timer-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 14px;border-radius:6px;cursor:pointer;font-family:'Heebo',sans-serif;font-size:13px;transition:all 0.2s;}
+  .timer-btn:hover{background:var(--accent);border-color:var(--accent);color:#000;}
+  .timer-btn.running{background:rgba(167,139,250,0.2);border-color:var(--accent2);color:var(--accent2);}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;}
+  .section-header{display:flex;align-items:center;gap:16px;margin-bottom:28px;}
+  .section-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+  .icon-t{background:rgba(249,115,22,0.1);border:1px solid var(--accent);}
+  .icon-d{background:rgba(167,139,250,0.1);border:1px solid var(--accent2);}
+  .icon-p{background:rgba(52,211,153,0.1);border:1px solid var(--accent3);}
+  .icon-s{background:rgba(255,255,255,0.05);border:1px solid var(--border);}
+  .section-header-text h2{font-size:24px;font-weight:800;}
+  .section-header-text p{font-size:14px;color:var(--text-muted);}
+  .divider{height:1px;background:var(--border);margin:24px 0;}
+  .nav-buttons{display:flex;justify-content:space-between;align-items:center;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .nav-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 24px;border-radius:8px;cursor:pointer;font-family:'Heebo',sans-serif;font-size:15px;font-weight:500;transition:all 0.2s;display:flex;align-items:center;gap:8px;text-decoration:none;}
+  .nav-btn:hover{background:var(--accent);border-color:var(--accent);color:#000;}
+  .nav-btn:disabled{opacity:0.3;cursor:not-allowed;}
+  .nav-btn:disabled:hover{background:var(--surface);border-color:var(--border);color:var(--text);}
+  .quote{border-right:3px solid var(--accent);padding:12px 20px;margin:16px 0;background:rgba(249,115,22,0.05);border-radius:0 8px 8px 0;}
+  .quote p{font-size:16px;color:var(--text);font-style:italic;margin:0;}
+  .progress-label{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-muted);margin-bottom:8px;display:flex;justify-content:space-between;}
+  .progress-bar{height:3px;background:var(--border);border-radius:2px;margin:24px 0;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent) 0%,var(--accent2) 100%);border-radius:2px;}
+  .hl{color:var(--accent);font-weight:600;}
+  .hl2{color:var(--accent2);font-weight:600;}
+  .hl3{color:var(--accent3);font-weight:600;}
+  @media(max-width:600px){.two-col,.vs-row{grid-template-columns:1fr;}.content{padding:24px 20px;}.hero{padding:40px 20px;}.timeline-nav{padding:0 20px;}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="session-badge">Session 03 / 08</div>
+  <h1>Prompt Engineering מתקדם</h1>
+  <p class="hero-subtitle">הטכניקות שהופכות תשובות בינוניות לתוצאות מדויקות, עקביות ומרשימות</p>
+  <div class="meta-row">
+    <div class="meta-chip"><span class="dot dot-a"></span>60 דקות</div>
+    <div class="meta-chip"><span class="dot dot-b"></span>כל הרמות</div>
+    <div class="meta-chip"><span class="dot dot-c"></span>Claude.ai</div>
+  </div>
+</div>
+
+<div class="timeline-nav">
+  <button class="timeline-btn active" onclick="showSection('overview')">📋 סקירה</button>
+  <button class="timeline-btn" onclick="showSection('theory')"><span class="time-tag">0-15'</span>תיאוריה</button>
+  <button class="timeline-btn" onclick="showSection('demo')"><span class="time-tag">15-40'</span>דמו חי</button>
+  <button class="timeline-btn" onclick="showSection('practice')"><span class="time-tag">40-60'</span>תרגול</button>
+  <button class="timeline-btn" onclick="showSection('summary')">✅ סיכום</button>
+</div>
+
+<div class="content">
+
+  <!-- OVERVIEW -->
+  <div class="section active" id="section-overview">
+    <div class="section-header">
+      <div class="section-icon icon-s">🗺️</div>
+      <div class="section-header-text"><h2>מה קורה היום?</h2><p>סקירת המפגש</p></div>
+    </div>
+    <div class="block block-neutral">
+      <div class="block-tag tag-tip">⚡ מטרת המפגש</div>
+      <h2>מהנחשים לאמן</h2>
+      <p>רוב האנשים כותבים Prompts כמו שהם שואלים שאלה בגוגל. היום נלמד 5 טכניקות שהופכות את הפלט של קלוד מ"בסדר" ל<span class="hl">מדויק, עקבי ומקצועי</span>.</p>
+      <div class="quote"><p>"The quality of your output is determined by the quality of your input." — כל Prompt Engineer מנוסה</p></div>
+    </div>
+    <div class="two-col">
+      <div class="block block-theory" style="margin-bottom:0">
+        <div class="block-tag tag-theory">תיאוריה / 15 דק׳</div>
+        <h3>5 טכניקות מתקדמות</h3>
+        <p>Role Prompting, Chain of Thought, Few-Shot, XML Structure, Negative Prompting.</p>
+      </div>
+      <div class="block block-demo" style="margin-bottom:0">
+        <div class="block-tag tag-demo">דמו חי / 25 דק׳</div>
+        <h3>לפני ואחרי — חי</h3>
+        <p>כל טכניקה עם דוגמה אמיתית — אותה משימה, Prompt שונה, תוצאה שונה לחלוטין.</p>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <div class="block block-practice" style="margin-bottom:0">
+        <div class="block-tag tag-practice">תרגול / 20 דק׳</div>
+        <h3>אתגר השיפור</h3>
+        <p>כל אחד לוקח Prompt שלו מהשבוע האחרון ומשפר אותו עם לפחות 3 טכניקות.</p>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <a class="nav-btn" href="../lesson-2/lesson-2.html">→ מפגש 2</a>
+      <button class="nav-btn" onclick="showSection('theory')">תיאוריה ←</button>
+    </div>
+  </div>
+
+  <!-- THEORY -->
+  <div class="section" id="section-theory">
+    <div class="section-header">
+      <div class="section-icon icon-t">🧠</div>
+      <div class="section-header-text"><h2>תיאוריה</h2><p>15 דקות — 5 טכניקות שמשנות הכל</p></div>
+    </div>
+    <div class="timer-block">
+      <span class="timer-label">טיימר — תיאוריה</span>
+      <span class="timer-display" id="t1">15:00</span>
+      <div class="timer-controls">
+        <button class="timer-btn" id="btn1" onclick="toggleTimer('t1','btn1',15)">▶ התחל</button>
+        <button class="timer-btn" onclick="resetTimer('t1','btn1',15)">↺</button>
+      </div>
+    </div>
+
+    <div class="block block-theory">
+      <div class="block-tag tag-theory">טכניקה 1 — Role Prompting</div>
+      <h2>תן לקלוד זהות</h2>
+      <p>קלוד מתנהג אחרת לחלוטין כשאתה מגדיר לו תפקיד ספציפי.</p>
+      <div class="vs-row">
+        <div class="prompt-box prompt-bad">
+          <div class="prompt-label" style="color:var(--accent2)">❌ בלי Role</div>
+          <div class="prompt-text">תן לי עצות שיווק לעסק שלי.</div>
+        </div>
+        <div class="prompt-box">
+          <div class="prompt-label">✅ עם Role</div>
+          <div class="prompt-text">אתה CMO עם 15 שנות ניסיון בשיווק D2C לעסקים קטנים בישראל. תן לי 5 עצות שיווק אסטרטגיות לעסק שמוכר [X] לקהל [Y] עם תקציב של [Z] בחודש.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block block-theory">
+      <div class="block-tag tag-theory">טכניקה 2 — Chain of Thought</div>
+      <h2>תגרום לו לחשוב בשלבים</h2>
+      <p>כשאומרים לקלוד לפרק בעיה לשלבים — הוא עושה פחות טעויות ומגיע לתשובות עמוקות יותר.</p>
+      <div class="prompt-box">
+        <div class="prompt-label">✅ Chain of Thought</div>
+        <div class="prompt-text">
+          לפני שאתה עונה, עשה את הדברים הבאים בסדר:<br>
+          שלב 1: זהה את הבעיה האמיתית<br>
+          שלב 2: רשום 3 גישות אפשריות<br>
+          שלב 3: השווה בין הגישות<br>
+          שלב 4: רק אז — תן המלצה מנומקת<br><br>
+          הבעיה: [הבעיה שלך]
+        </div>
+      </div>
+    </div>
+
+    <div class="block block-theory">
+      <div class="block-tag tag-theory">טכניקה 3 — Few-Shot</div>
+      <h2>תראה לו דוגמאות</h2>
+      <p>במקום לתאר מה אתה רוצה — תראה דוגמאות. קלוד לומד מהדוגמאות ומחקה את הסגנון.</p>
+      <div class="prompt-box">
+        <div class="prompt-label">✅ Few-Shot</div>
+        <div class="prompt-text">
+          כתוב כותרת לפוסט אינסטגרם בסגנון הדוגמאות האלה:<br><br>
+          דוגמה 1: "הלקוח לא קונה מוצר. הוא קונה את הגרסה הטובה של עצמו."<br>
+          דוגמה 2: "3 שאלות שכל עסק חייב לשאול לפני שהוא מוציא שקל על פרסום."<br>
+          דוגמה 3: "למה הלקוח הכי טוב שלך לא מפנה אליך חברים?"<br><br>
+          עכשיו כתוב 5 כותרות על הנושא: [נושא]
+        </div>
+      </div>
+    </div>
+
+    <div class="block block-theory">
+      <div class="block-tag tag-theory">טכניקה 4 — XML Structure</div>
+      <h2>XML = פלט מסודר ועקבי</h2>
+      <p>כשאתה רוצה שקלוד יחזיר תוצאה בפורמט קבוע — XML עובד טוב יותר מתיאור.</p>
+      <div class="prompt-box">
+        <div class="prompt-label">✅ XML Output</div>
+        <div class="prompt-text">
+          נתח את המייל הבא ותחזיר את הפלט בפורמט:<br><br>
+          &lt;analysis&gt;<br>
+          &nbsp;&nbsp;&lt;sentiment&gt;חיובי/שלילי/ניטרלי&lt;/sentiment&gt;<br>
+          &nbsp;&nbsp;&lt;urgency&gt;גבוה/בינוני/נמוך&lt;/urgency&gt;<br>
+          &nbsp;&nbsp;&lt;main_request&gt;מה הם רוצים?&lt;/main_request&gt;<br>
+          &nbsp;&nbsp;&lt;recommended_action&gt;מה כדאי לעשות?&lt;/recommended_action&gt;<br>
+          &lt;/analysis&gt;<br><br>
+          המייל: [הדבק מייל]
+        </div>
+      </div>
+    </div>
+
+    <div class="block block-theory">
+      <div class="block-tag tag-theory">טכניקה 5 — Negative Prompting</div>
+      <h2>תגיד מה אתה לא רוצה</h2>
+      <p>קלוד נוטה לכלול דברים שלא ביקשת. "אל תעשה X" עובד טוב כמו "עשה Y".</p>
+      <div class="prompt-box">
+        <div class="prompt-label">✅ Negative Constraints</div>
+        <div class="prompt-text">
+          כתוב לי תיאור מוצר ל[מוצר].<br><br>
+          אל תכלול: מחירים, ביטויי קלישאה ("מהפכני", "ייחודי", "פורץ דרך"), השוואות למתחרים.<br>
+          אל תשתמש ב: bullet points, כותרות, מספור.<br>
+          פורמט: 3 פסקאות, עברית, גוף שני (אתה/את).
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="showSection('overview')">→ סקירה</button>
+      <button class="nav-btn" onclick="showSection('demo')">דמו חי ←</button>
+    </div>
+  </div>
+
+  <!-- DEMO -->
+  <div class="section" id="section-demo">
+    <div class="section-header">
+      <div class="section-icon icon-d">🎬</div>
+      <div class="section-header-text"><h2>דמו חי</h2><p>25 דקות — לפני ואחרי בזמן אמת</p></div>
+    </div>
+    <div class="timer-block">
+      <span class="timer-label">טיימר — דמו</span>
+      <span class="timer-display" id="t2">25:00</span>
+      <div class="timer-controls">
+        <button class="timer-btn" id="btn2" onclick="toggleTimer('t2','btn2',25)">▶ התחל</button>
+        <button class="timer-btn" onclick="resetTimer('t2','btn2',25)">↺</button>
+      </div>
+    </div>
+    <div class="callout">
+      <span class="callout-icon">🎯</span>
+      <div class="callout-text"><strong>הנחיית מנחה:</strong> לכל דמו — הרץ קודם את ה-Prompt "הרע", תראה את התוצאה, ואז הרץ את ה"טוב". תן להם להרגיש את ההבדל בעצמם לפני שתסביר.</div>
+    </div>
+
+    <div class="block block-demo">
+      <div class="block-tag tag-demo">דמו 1 / ~8 דקות — Role + Few-Shot</div>
+      <h2>כתיבת תוכן שנשמע כמו המותג</h2>
+      <p>הדגמה: לכתוב פוסט לינקדאין עבור העסק של אחד מהם.</p>
+      <div class="vs-row">
+        <div class="prompt-box prompt-bad">
+          <div class="prompt-label" style="color:var(--accent2)">❌ לפני</div>
+          <div class="prompt-text">כתוב לי פוסט לינקדאין על [נושא].</div>
+        </div>
+        <div class="prompt-box">
+          <div class="prompt-label">✅ אחרי</div>
+          <div class="prompt-text">אתה מנהל תוכן עם ניסיון בבניית מותגי אישיים בלינקדאין.<br><br>הסגנון שלי: [3 משפטים שכתב בעצמו]<br>קהל היעד: [X]<br><br>כתוב פוסט על [נושא] שנשמע בדיוק כמוני. אל תשתמש בביטויי קלישאה. הוסף CTA בסוף.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block block-demo">
+      <div class="block-tag tag-demo">דמו 2 / ~9 דקות — Chain of Thought</div>
+      <h2>קבלת החלטה עסקית</h2>
+      <p>הדגמה: שאלה עסקית אמיתית שאחד מהם מתמודד איתה.</p>
+      <div class="prompt-box">
+        <div class="prompt-label">✅ Chain of Thought לקבלת החלטה</div>
+        <div class="prompt-text">
+          אתה יועץ עסקי מנוסה. עזור לי להחליט: [שאל את אוהד/אלי על דילמה עסקית שלהם]<br><br>
+          שלב 1: זהה את הסיכונים העיקריים (לפחות 3)<br>
+          שלב 2: זהה את ההזדמנויות (לפחות 3)<br>
+          שלב 3: מה אני צריך לדעת שאני לא יודע? (רשום שאלות לבירור)<br>
+          שלב 4: בהינתן המידע שיש לך — מה ההמלצה שלך ולמה?
+        </div>
+      </div>
+    </div>
+
+    <div class="block block-demo">
+      <div class="block-tag tag-demo">דמו 3 / ~8 דקות — XML + Negative</div>
+      <h2>ניתוח מיילים אוטומטי</h2>
+      <p>הדגמה מעשית: הדבק מייל אמיתי מלקוח וקבל ניתוח מובנה.</p>
+      <div class="prompt-box">
+        <div class="prompt-label">✅ XML + Negative לניתוח מיילים</div>
+        <div class="prompt-text">
+          נתח את המייל הבא. אל תציין שום מידע שלא מופיע מפורשות במייל.<br><br>
+          &lt;email&gt;[הדבק מייל]&lt;/email&gt;<br><br>
+          החזר ניתוח בפורמט:<br>
+          &lt;result&gt;<br>
+          &nbsp;&lt;mood&gt;מה הטון הרגשי?&lt;/mood&gt;<br>
+          &nbsp;&lt;request&gt;מה מבקשים?&lt;/request&gt;<br>
+          &nbsp;&lt;urgency&gt;1-5&lt;/urgency&gt;<br>
+          &nbsp;&lt;draft_reply&gt;טיוטת תשובה קצרה&lt;/draft_reply&gt;<br>
+          &lt;/result&gt;
+        </div>
+      </div>
+      <div class="callout">
+        <span class="callout-icon">💡</span>
+        <div class="callout-text"><strong>למה XML?</strong> אפשר לקחת את הפלט הזה ולהכניס ישירות לאוטומציה — Make.com, Zapier, או Claude Code. מפגש 5 יסביר איך.</div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="showSection('theory')">→ תיאוריה</button>
+      <button class="nav-btn" onclick="showSection('practice')">תרגול ←</button>
+    </div>
+  </div>
+
+  <!-- PRACTICE -->
+  <div class="section" id="section-practice">
+    <div class="section-header">
+      <div class="section-icon icon-p">⚡</div>
+      <div class="section-header-text"><h2>תרגול ביחד</h2><p>20 דקות — אתגר השיפור</p></div>
+    </div>
+    <div class="timer-block">
+      <span class="timer-label">טיימר — תרגול</span>
+      <span class="timer-display" id="t3">20:00</span>
+      <div class="timer-controls">
+        <button class="timer-btn" id="btn3" onclick="toggleTimer('t3','btn3',20)">▶ התחל</button>
+        <button class="timer-btn" onclick="resetTimer('t3','btn3',20)">↺</button>
+      </div>
+    </div>
+    <div class="block block-practice">
+      <div class="block-tag tag-practice">אתגר השיפור — כולם</div>
+      <h2>קח Prompt ישן — שפר אותו</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num sn-p">1</div>
+          <div class="step-content"><h4>בחר Prompt שכתבת השבוע</h4><p>משהו שהתוצאה שלו הייתה "בסדר" אבל לא מרשימה</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num sn-p">2</div>
+          <div class="step-content"><h4>הוסף לפחות 3 טכניקות</h4><p>Role + Chain of Thought + Negative כמינימום</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num sn-p">3</div>
+          <div class="step-content"><h4>הרץ את שניהם והשווה</h4><p>מה השתנה? מה עדיין לא מושלם?</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num sn-p">4</div>
+          <div class="step-content"><h4>שמור את הגרסה הטובה</h4><p>הוסף אותה ל-Project שלך — זה ה-Prompt Library שלך</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="block block-practice">
+      <div class="block-tag tag-practice">אתגר בונוס — לאלי</div>
+      <h2>Prompt שמחזיר JSON</h2>
+      <p>אלי — תנסה לכתוב Prompt שמחזיר תוצאה ב-JSON format שאפשר להשתמש ב-API.</p>
+      <div class="prompt-box" style="border-color:var(--accent3)">
+        <div class="prompt-label" style="color:var(--accent3)">Prompt לJSON Output</div>
+        <div class="prompt-text">
+          [תיאור המשימה]<br><br>
+          החזר את הפלט אך ורק כ-JSON תקין, ללא טקסט נוסף, בפורמט:<br>
+          {<br>
+          &nbsp;"field1": "value",<br>
+          &nbsp;"field2": ["item1", "item2"],<br>
+          &nbsp;"field3": true<br>
+          }
+        </div>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="showSection('demo')">→ דמו</button>
+      <button class="nav-btn" onclick="showSection('summary')">סיכום ←</button>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="section" id="section-summary">
+    <div class="section-header">
+      <div class="section-icon icon-s">✅</div>
+      <div class="section-header-text"><h2>סיכום המפגש</h2><p>מה לקחנו הביתה</p></div>
+    </div>
+    <div class="block block-neutral">
+      <div class="block-tag tag-tip">📌 5 הטכניקות — תזכורת מהירה</div>
+      <div class="steps">
+        <div class="step"><div class="step-num sn-t">1</div><div class="step-content"><h4>Role Prompting</h4><p>"אתה [מומחה עם ניסיון ספציפי]..."</p></div></div>
+        <div class="step"><div class="step-num sn-t">2</div><div class="step-content"><h4>Chain of Thought</h4><p>"שלב 1... שלב 2... רק אז תן תשובה"</p></div></div>
+        <div class="step"><div class="step-num sn-t">3</div><div class="step-content"><h4>Few-Shot</h4><p>"דוגמה 1... דוגמה 2... עכשיו תעשה אותו דבר ל..."</p></div></div>
+        <div class="step"><div class="step-num sn-t">4</div><div class="step-content"><h4>XML / JSON Structure</h4><p>"החזר בפורמט &lt;tag&gt;...&lt;/tag&gt;"</p></div></div>
+        <div class="step"><div class="step-num sn-t">5</div><div class="step-content"><h4>Negative Prompting</h4><p>"אל תכלול... אל תשתמש ב..."</p></div></div>
+      </div>
+    </div>
+    <div class="block block-neutral">
+      <div class="block-tag tag-tip">🏠 שיעורי בית</div>
+      <ul class="checklist">
+        <li><span class="check-box" onclick="toggleCheck(this)"></span>בנה "Prompt Library" — קובץ עם 5 Prompts מוצלחים שלך</li>
+        <li><span class="check-box" onclick="toggleCheck(this)"></span>הוסף אותם ל-Knowledge Base של ה-Project שלך</li>
+        <li><span class="check-box" onclick="toggleCheck(this)"></span>נסה Prompt שמחזיר XML — השתמש בתוצאה לדבר אמיתי</li>
+      </ul>
+    </div>
+    <div class="block block-neutral">
+      <div class="block-tag tag-tip">🔜 מפגש 4 — Claude Design</div>
+      <h2>הבא בתור</h2>
+      <p>נגלה את הכלי החדש ביותר של Anthropic — <span class="hl">Claude Design</span>. נבנה פרוטוטייפ, מצגת, ו-one-pager ישירות בשיחה עם קלוד. ואז נעביר אותו ל-Claude Code.</p>
+    </div>
+    <div class="progress-label"><span>התקדמות הקורס</span><span>מפגש 3 / 8</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:37.5%"></div></div>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="showSection('practice')">→ תרגול</button>
+      <button class="nav-btn" disabled>מפגש 4 — בקרוב ←</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.timeline-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  const map={overview:0,theory:1,demo:2,practice:3,summary:4};
+  document.querySelectorAll('.timeline-btn')[map[id]].classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleCheck(el){el.classList.toggle('checked');}
+const timers={};
+function toggleTimer(tid,bid,mins){
+  if(timers[tid]&&timers[tid].running){
+    clearInterval(timers[tid].interval);timers[tid].running=false;
+    document.getElementById(bid).classList.remove('running');
+    document.getElementById(bid).textContent='▶ המשך';
+  } else {
+    if(!timers[tid])timers[tid]={seconds:mins*60,running:false};
+    timers[tid].running=true;
+    document.getElementById(bid).classList.add('running');
+    document.getElementById(bid).textContent='⏸ עצור';
+    timers[tid].interval=setInterval(()=>{
+      if(timers[tid].seconds<=0){clearInterval(timers[tid].interval);document.getElementById(tid).textContent='⏰ סיום!';return;}
+      timers[tid].seconds--;
+      const m=Math.floor(timers[tid].seconds/60),s=timers[tid].seconds%60;
+      document.getElementById(tid).textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    },1000);
+  }
+}
+function resetTimer(tid,bid,mins){
+  if(timers[tid]){clearInterval(timers[tid].interval);timers[tid]=null;}
+  document.getElementById(tid).textContent=`${String(mins).padStart(2,'0')}:00`;
+  document.getElementById(bid).classList.remove('running');
+  document.getElementById(bid).textContent='▶ התחל';
+}
+</script>
+</body>
+</html>
