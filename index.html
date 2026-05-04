@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>קורס Claude Class — דף הבית</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --accent: #7c6aff;
+    --accent2: #ff6a9e;
+    --accent3: #6affd4;
+    --text: #e8e8f0;
+    --text-muted: #7070a0;
+    --border: #2a2a40;
+    --theory: #1e1635;
+    --theory-border: #7c6aff;
+    --demo: #0d2020;
+    --demo-border: #6affd4;
+    --practice: #200d1a;
+    --practice-border: #ff6a9e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Heebo', sans-serif;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #0a0a0f 0%, #1a0d2e 50%, #0a1a1a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 56px 32px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(124,106,255,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -80px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(106,255,212,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .site-badge {
+    display: inline-block;
+    background: rgba(124,106,255,0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 6px 16px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    font-size: clamp(28px, 4.5vw, 48px);
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 14px;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 60%, var(--accent3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle {
+    font-size: 17px;
+    color: var(--text-muted);
+    max-width: 560px;
+  }
+
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 32px 64px;
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .lesson-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .lesson-card {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 26px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    position: relative;
+  }
+
+  a.lesson-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(124,106,255,0.25), 0 12px 40px rgba(0,0,0,0.35);
+    transform: translateY(-2px);
+  }
+
+  a.lesson-card:focus-visible {
+    outline: 2px solid var(--accent3);
+    outline-offset: 3px;
+  }
+
+  .lesson-card.coming-soon {
+    cursor: default;
+    opacity: 0.72;
+    background: var(--surface2);
+  }
+
+  .lesson-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+  .lesson-card.coming-soon .lesson-num {
+    color: var(--text-muted);
+  }
+
+  .lesson-card h2 {
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text);
+    line-height: 1.35;
+  }
+
+  .lesson-card p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  .badge-soon {
+    display: inline-block;
+    margin-top: 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    border: 1px solid rgba(255,106,158,0.35);
+    background: rgba(255,106,158,0.08);
+    padding: 5px 12px;
+    border-radius: 4px;
+  }
+
+  .lesson-card-link-hint {
+    margin-top: 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent3);
+  }
+
+  a.lesson-card:hover .lesson-card-link-hint {
+    color: var(--accent);
+  }
+
+  footer {
+    text-align: center;
+    padding: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <span class="site-badge">Claude Class</span>
+      <h1>ברוכים הבאים לקורס</h1>
+      <p class="hero-subtitle">בחרו מפגש מהרשימה כדי להתחיל. המפגשים יתווספו בהדרגה לאורך הקורס.</p>
+    </div>
+  </header>
+
+  <main>
+    <p class="section-title">ניווט למפגשים</p>
+    <div class="lesson-grid">
+      <a class="lesson-card" href="./lesson-1/lesson-1.html">
+        <div class="lesson-num">מפגש 01</div>
+        <h2>מהצ׳אט לסוכן</h2>
+        <p>מעבר מצ׳אט פשוט לעבודה עם סוכן: כלים, הקשר, ותרגול מעשי בסביבת הפיתוח.</p>
+        <span class="lesson-card-link-hint">לחצו לכניסה למפגש ←</span>
+      </a>
+
+      <article class="lesson-card coming-soon" aria-disabled="true">
+        <div class="lesson-num">מפגש 02</div>
+        <h2>זרימת עבודה עם הקשר</h2>
+        <p>ניהול הקשר ארוך, קבצים, ופרויקטים — איך לשמור על דיוק ומהירות לאורך זמן.</p>
+        <span class="badge-soon">בקרוב</span>
+      </article>
+
+      <article class="lesson-card coming-soon" aria-disabled="true">
+        <div class="lesson-num">מפגש 03</div>
+        <h2>כלים ואוטומציה</h2>
+        <p>חיבור כלים חיצוניים, הרצת פקודות, ובניית לולאות עבודה חוזרות עם הסוכן.</p>
+        <span class="badge-soon">בקרוב</span>
+      </article>
+
+      <article class="lesson-card coming-soon" aria-disabled="true">
+        <div class="lesson-num">מפגש 04</div>
+        <h2>ביקורת קוד ואיכות</h2>
+        <p>שימוש ב־AI לסקירות, סטנדרטים בצוות, ושילוב ביקורת אנושית ומכונה.</p>
+        <span class="badge-soon">בקרוב</span>
+      </article>
+
+      <article class="lesson-card coming-soon" aria-disabled="true">
+        <div class="lesson-num">מפגש 05</div>
+        <h2>אבטחה ופרטיות</h2>
+        <p>מה בטוח לשתף במודל, סודות, נתונים רגישים, ודפוסי עבודה אחראיים.</p>
+        <span class="badge-soon">בקרוב</span>
+      </article>
+
+      <article class="lesson-card coming-soon" aria-disabled="true">
+        <div class="lesson-num">מפגש 06</div>
+        <h2>פרומפטים מתקדמים</h2>
+        <p>מבנה הוראות, דוגמאות few-shot, והפרדה בין תפקידים לתוצאות יציבות יותר.</p>
+        <span class="badge-soon">בקרוב</span>
+      </article>
+
+      <article class="lesson-card coming-soon" aria-disabled="true">
+        <div class="lesson-num">מפגש 07</div>
+        <h2>פרויקט קצה-לקצה</h2>
+        <p>בניית פיצ׳ר מלא עם תכנון, יישום, בדיקות ותיעוד — יחד עם הסוכן.</p>
+        <span class="badge-soon">בקרוב</span>
+      </article>
+
+      <article class="lesson-card coming-soon" aria-disabled="true">
+        <div class="lesson-num">מפגש 08</div>
+        <h2>סיכום וקדימה</h2>
+        <p>ארגון ידע אישי, הרגלים יומיומיים, ואיך להמשיך ללמוד אחרי הקורס.</p>
+        <span class="badge-soon">בקרוב</span>
+      </article>
+    </div>
+  </main>
+
+  <footer>Claude Class — קורס מעשי בעברית</footer>
+</body>
+</html>
